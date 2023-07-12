@@ -1,9 +1,4 @@
-const {
-  FileCreateTransaction,
-  ContractCreateTransaction,
-  ContractFunctionParameters,
-  ContractCreateFlow,
-} = require('@hashgraph/sdk');
+const { ContractCreateFlow } = require('@hashgraph/sdk');
 
 const deploy = async client => {
   let esealCompiled = require('../artifacts/contracts/Permit2.sol/Permit2.json');

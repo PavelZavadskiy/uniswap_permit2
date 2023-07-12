@@ -1,9 +1,12 @@
+require('dotenv').config();
+
 const { Client, AccountBalanceQuery } = require('@hashgraph/sdk');
 const { deploy } = require('./deploy');
 
-const myDefaultAccountId = '0.0.15339451';
-const myDefaultPrivateKey =
-  '3030020100300706052b8104000a04220420fbdded02a431af832b9faa3aa7afaa2d348e7912a2ccce4eb6837b4cd3431af7';
+const { DEFAULT_ACCOUNT_ID, DEFAULT_PRIVATE_KEY } = process.env;
+
+const myDefaultAccountId = DEFAULT_ACCOUNT_ID;
+const myDefaultPrivateKey = DEFAULT_PRIVATE_KEY;
 
 const client = Client.forTestnet();
 client.setOperator(myDefaultAccountId, myDefaultPrivateKey);
