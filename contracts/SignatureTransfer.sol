@@ -48,13 +48,6 @@ contract SignatureTransfer is ISignatureTransfer, EIP712 {
     /// @param owner The owner of the tokens to transfer
     /// @param transferDetails The spender's requested transfer details for the permitted token
     /// @param signature The signature to verify
-
-    /// @notice Передає маркер за допомогою підписаного повідомлення про дозвіл.
-     /// @param permit Дані дозволу, підписані власником
-     /// @param dataHash Хеш EIP-712 дозволених даних для включення під час перевірки підпису
-     /// @param owner Власник токенів для передачі
-     /// @param transferDetails Деталі переказу, запитані споживачем для дозволеного токена
-     /// @param signature Підпис для перевірки
     function _permitTransferFrom(
         PermitTransferFrom memory permit,
         SignatureTransferDetails calldata transferDetails,
@@ -103,12 +96,6 @@ contract SignatureTransfer is ISignatureTransfer, EIP712 {
     /// @param dataHash The EIP-712 hash of permit data to include when checking signature
     /// @param owner The owner of the tokens to transfer
     /// @param signature The signature to verify
-
-    /// @notice Передає токени за допомогою підписаних повідомлень про дозвіл
-     /// @param permit Дані дозволу, підписані власником
-     /// @param dataHash Хеш EIP-712 дозволених даних для включення під час перевірки підпису
-     /// @param owner Власник токенів для передачі
-     /// @param signature Підпис для перевірки
     function _permitTransferFrom(
         PermitBatchTransferFrom memory permit,
         SignatureTransferDetails[] calldata transferDetails,
@@ -152,13 +139,6 @@ contract SignatureTransfer is ISignatureTransfer, EIP712 {
     /// @return bitPos The bit position
     /// @dev The first 248 bits of the nonce value is the index of the desired bitmap
     /// @dev The last 8 bits of the nonce value is the position of the bit in the bitmap
-
-    /// @notice Повертає індекс растрового зображення та позицію біта в ньому. Використовується для невпорядкованих нонсів
-     /// @param nonce Одноразовий номер для отримання пов’язаних позицій слова та біта
-     /// @return wordPos Позиція слова або індекс у nonceBitmap
-     /// @return bitPos Позиція біта
-     /// @dev Перші 248 біт значення nonce є індексом потрібного растрового зображення
-     /// @dev Останні 8 бітів значення nonce є позицією біта в растровому зображенні
     function bitmapPositions(uint256 nonce) private pure returns (uint256 wordPos, uint256 bitPos) {
         wordPos = uint248(nonce >> 8);
         bitPos = uint8(nonce);
@@ -167,10 +147,6 @@ contract SignatureTransfer is ISignatureTransfer, EIP712 {
     /// @notice Checks whether a nonce is taken and sets the bit at the bit position in the bitmap at the word position
     /// @param from The address to use the nonce at
     /// @param nonce The nonce to spend
-
-    /// @notice Перевіряє, чи береться одноразовий номер, і встановлює біт у позицію біта в бітовому зображенні в позицію слова
-     /// @param from Адреса для використання nonce
-     /// @param nonce Один раз, який потрібно витратити
     function _useUnorderedNonce(address from, uint256 nonce) internal {
         (uint256 wordPos, uint256 bitPos) = bitmapPositions(nonce);
         uint256 bit = 1 << bitPos;

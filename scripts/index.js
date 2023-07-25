@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const { Client, AccountBalanceQuery } = require('@hashgraph/sdk');
+const { Client, AccountBalanceQuery, TransferTransaction, Hbar } = require('@hashgraph/sdk');
 const { deploy } = require('./deploy');
 
 const { DEFAULT_ACCOUNT_ID, DEFAULT_PRIVATE_KEY } = process.env;
