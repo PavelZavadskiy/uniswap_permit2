@@ -19,9 +19,9 @@ const deploy = async client => {
   const contractTx = new ContractCreateFlow()
     .setGas(3000000)
     .setBytecode(bytecode)
-    .setAutoRenewAccountId(myDefaultAccountId)
-    .setAdminKey(PrivateKey.fromString(myDefaultPrivateKey))
-    .sign(PrivateKey.fromString(myDefaultPrivateKey));
+    .setAutoRenewAccountId(myDefaultAccountId);
+  // .setAdminKey(PrivateKey.fromString(myDefaultPrivateKey))
+  // .sign(PrivateKey.fromString(myDefaultPrivateKey));
   // .setInitialBalance(new Hbar(10));
 
   //Submit the transaction to the Hedera test network
