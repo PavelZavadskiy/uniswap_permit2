@@ -36,20 +36,20 @@ const deploy = async client => {
   //Log the smart contract ID
   console.log('The smart contract ID is ' + newContractId);
 
-  const transaction = new TransferTransaction()
-    .addHbarTransfer(myDefaultAccountId, new Hbar(-10))
-    .addHbarTransfer(newContractId.toString(), new Hbar(10));
+  // const transaction = new TransferTransaction()
+  //   .addHbarTransfer(myDefaultAccountId, new Hbar(-10))
+  //   .addHbarTransfer(newContractId.toString(), new Hbar(10));
 
-  //Submit the transaction to a Hedera network
-  const txResponse = await transaction.execute(client);
+  // //Submit the transaction to a Hedera network
+  // const txResponse = await transaction.execute(client);
 
-  //Request the receipt of the transaction
-  const receipt = await txResponse.getReceipt(client);
+  // //Request the receipt of the transaction
+  // const receipt = await txResponse.getReceipt(client);
 
-  //Get the transaction consensus status
-  const transactionStatus = receipt.status;
+  // //Get the transaction consensus status
+  // const transactionStatus = receipt.status;
 
-  console.log('The transaction consensus status is ' + transactionStatus.toString());
+  // console.log('The transaction consensus status is ' + transactionStatus.toString());
 };
 
 module.exports = { deploy };

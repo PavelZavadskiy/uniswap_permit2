@@ -10,7 +10,7 @@ describe('AllowanceTransfer', () => {
   let account2: any;
   let account3: any;
 
-  let contract: any;
+  let permit2Contract: any;
   let token1: any;
   let token2: any;
   let mockContract: any;
@@ -26,8 +26,8 @@ describe('AllowanceTransfer', () => {
 
   beforeEach(async function () {
     const Permit2 = await ethers.getContractFactory('Permit2');
-    contract = await Permit2.deploy();
-    await contract.deployed();
+    permit2Contract = await Permit2.deploy();
+    await permit2Contract.deployed();
 
     const MockToken = await ethers.getContractFactory('MockERC20');
     token1 = await MockToken.deploy();
@@ -40,7 +40,7 @@ describe('AllowanceTransfer', () => {
     await token2.deployed();
 
     const MockContract = await ethers.getContractFactory('MockAllowanceTransfer');
-    mockContract = await MockContract.deploy(contract.address);
+    mockContract = await MockContract.deploy(permit2Contract.address);
     await mockContract.deployed();
 
     [owner, account1, account2, account3] = await ethers.getSigners();
@@ -48,10 +48,10 @@ describe('AllowanceTransfer', () => {
     network = await ethers.provider.getNetwork();
 
     await token1.mint(account1.address, bn1e18);
-    await token1.connect(account1).approve(contract.address, MAX_UINT256);
+    await token1.connect(account1).approve(permit2Contract.address, MAX_UINT256);
 
     await token2.mint(account1.address, bn1e18);
-    await token2.connect(account1).approve(contract.address, MAX_UINT256);
+    await token2.connect(account1).approve(permit2Contract.address, MAX_UINT256);
   });
 
   describe('deposit (permit+transferFrom)', function () {
@@ -70,7 +70,11 @@ describe('AllowanceTransfer', () => {
       const beforeAccountBalance = await token1.balanceOf(account1.address);
       const beforeContractBalance = await token1.balanceOf(mockContract.address);
 
-      const { domain, types, values } = AllowanceTransfer.getPermitData(permit, contract.address, network.chainId);
+      const { domain, types, values } = AllowanceTransfer.getPermitData(
+        permit,
+        permit2Contract.address,
+        network.chainId
+      );
       let signature = await account1._signTypedData(domain, types, values);
 
       const result = await mockContract.connect(account1).deposit(bn1e17, permit, signature);
@@ -95,7 +99,11 @@ describe('AllowanceTransfer', () => {
         sigDeadline: MAX_UINT256,
       };
 
-      const { domain, types, values } = AllowanceTransfer.getPermitData(permit, contract.address, network.chainId);
+      const { domain, types, values } = AllowanceTransfer.getPermitData(
+        permit,
+        permit2Contract.address,
+        network.chainId
+      );
       let signature = await account1._signTypedData(domain, types, values);
 
       await mockContract.connect(account1).deposit(bn1e17, permit, signature);
@@ -116,7 +124,11 @@ describe('AllowanceTransfer', () => {
         sigDeadline: MAX_UINT256,
       };
 
-      const { domain, types, values } = AllowanceTransfer.getPermitData(permit, contract.address, network.chainId);
+      const { domain, types, values } = AllowanceTransfer.getPermitData(
+        permit,
+        permit2Contract.address,
+        network.chainId
+      );
       let signature = await account1._signTypedData(domain, types, values);
 
       await expect(mockContract.connect(account2).deposit(bn1e17, permit, signature)).to.be.revertedWith(
@@ -136,7 +148,11 @@ describe('AllowanceTransfer', () => {
         sigDeadline: MAX_UINT256,
       };
 
-      const { domain, types, values } = AllowanceTransfer.getPermitData(permit, contract.address, network.chainId);
+      const { domain, types, values } = AllowanceTransfer.getPermitData(
+        permit,
+        permit2Contract.address,
+        network.chainId
+      );
       let signature = await account1._signTypedData(domain, types, values);
 
       await expect(mockContract.connect(account1).deposit(bn1e18, permit, signature)).to.be.revertedWith(
@@ -157,7 +173,11 @@ describe('AllowanceTransfer', () => {
         sigDeadline: sigDeadline,
       };
 
-      const { domain, types, values } = AllowanceTransfer.getPermitData(permit, contract.address, network.chainId);
+      const { domain, types, values } = AllowanceTransfer.getPermitData(
+        permit,
+        permit2Contract.address,
+        network.chainId
+      );
       let signature = await account1._signTypedData(domain, types, values);
 
       await expect(mockContract.connect(account1).deposit(bn1e17, permit, signature)).to.be.revertedWith(
@@ -168,7 +188,7 @@ describe('AllowanceTransfer', () => {
 
   describe('depositAllowed (approve+transferFrom)', function () {
     it('Should deposit', async () => {
-      let result = await contract
+      let result = await permit2Contract
         .connect(account1)
         .approve(token1.address, mockContract.address, bn1e18, MaxAllowanceExpiration);
       expect(result).to.be.ok;
@@ -193,7 +213,7 @@ describe('AllowanceTransfer', () => {
     });
 
     it('Should not deposit. InsufficientAllowance', async () => {
-      let result = await contract
+      let result = await permit2Contract
         .connect(account1)
         .approve(token1.address, mockContract.address, bn1e17, MaxAllowanceExpiration);
       expect(result).to.be.ok;
@@ -205,7 +225,7 @@ describe('AllowanceTransfer', () => {
   });
 
   describe('deposit+depositAllowed', function () {
-    it('Should deposit (?)', async () => {
+    it('Should deposit', async () => {
       const permit: PermitSingle = {
         details: {
           token: token1.address,
@@ -220,7 +240,11 @@ describe('AllowanceTransfer', () => {
       const beforeAccountBalance = await token1.balanceOf(account1.address);
       const beforeContractBalance = await token1.balanceOf(mockContract.address);
 
-      const { domain, types, values } = AllowanceTransfer.getPermitData(permit, contract.address, network.chainId);
+      const { domain, types, values } = AllowanceTransfer.getPermitData(
+        permit,
+        permit2Contract.address,
+        network.chainId
+      );
       let signature = await account1._signTypedData(domain, types, values);
 
       let result = await mockContract.connect(account1).deposit(bn1e17, permit, signature);
@@ -249,7 +273,11 @@ describe('AllowanceTransfer', () => {
         sigDeadline: sigDeadline,
       };
 
-      const { domain, types, values } = AllowanceTransfer.getPermitData(permit, contract.address, network.chainId);
+      const { domain, types, values } = AllowanceTransfer.getPermitData(
+        permit,
+        permit2Contract.address,
+        network.chainId
+      );
       let signature = await account1._signTypedData(domain, types, values);
 
       await expect(mockContract.connect(account1).deposit(bn1e17, permit, signature)).to.be.revertedWith(
@@ -288,7 +316,11 @@ describe('AllowanceTransfer', () => {
       const beforeAccountToken2Balance = await token2.balanceOf(account1.address);
       const beforeContractToken2Balance = await token2.balanceOf(mockContract.address);
 
-      const { domain, types, values } = AllowanceTransfer.getPermitData(permit, contract.address, network.chainId);
+      const { domain, types, values } = AllowanceTransfer.getPermitData(
+        permit,
+        permit2Contract.address,
+        network.chainId
+      );
       let signature = await account1._signTypedData(domain, types, values);
 
       const result = await mockContract.connect(account1).depositBatch(bn1e17, permit, signature);
@@ -325,7 +357,11 @@ describe('AllowanceTransfer', () => {
         sigDeadline: MAX_UINT256,
       };
 
-      const { domain, types, values } = AllowanceTransfer.getPermitData(permit, contract.address, network.chainId);
+      const { domain, types, values } = AllowanceTransfer.getPermitData(
+        permit,
+        permit2Contract.address,
+        network.chainId
+      );
       let signature = await account1._signTypedData(domain, types, values);
 
       await mockContract.connect(account1).depositBatch(bn1e17, permit, signature);
@@ -354,7 +390,11 @@ describe('AllowanceTransfer', () => {
         sigDeadline: MAX_UINT256,
       };
 
-      const { domain, types, values } = AllowanceTransfer.getPermitData(permit, contract.address, network.chainId);
+      const { domain, types, values } = AllowanceTransfer.getPermitData(
+        permit,
+        permit2Contract.address,
+        network.chainId
+      );
       let signature = await account1._signTypedData(domain, types, values);
 
       await expect(mockContract.connect(account2).depositBatch(bn1e17, permit, signature)).to.be.revertedWith(
@@ -382,7 +422,11 @@ describe('AllowanceTransfer', () => {
         sigDeadline: MAX_UINT256,
       };
 
-      const { domain, types, values } = AllowanceTransfer.getPermitData(permit, contract.address, network.chainId);
+      const { domain, types, values } = AllowanceTransfer.getPermitData(
+        permit,
+        permit2Contract.address,
+        network.chainId
+      );
       let signature = await account1._signTypedData(domain, types, values);
 
       await expect(mockContract.connect(account1).depositBatch(bn1e18, permit, signature)).to.be.revertedWith(
@@ -412,7 +456,11 @@ describe('AllowanceTransfer', () => {
         sigDeadline: sigDeadline,
       };
 
-      const { domain, types, values } = AllowanceTransfer.getPermitData(permit, contract.address, network.chainId);
+      const { domain, types, values } = AllowanceTransfer.getPermitData(
+        permit,
+        permit2Contract.address,
+        network.chainId
+      );
       let signature = await account1._signTypedData(domain, types, values);
 
       await expect(mockContract.connect(account2).depositBatch(bn1e17, permit, signature)).to.be.revertedWith(
@@ -423,12 +471,12 @@ describe('AllowanceTransfer', () => {
 
   describe('depositAllowedBatch (approve+transferFrom)', function () {
     it('Should deposit', async () => {
-      let result = await contract
+      let result = await permit2Contract
         .connect(account1)
         .approve(token1.address, mockContract.address, bn1e18, MaxAllowanceExpiration);
       expect(result).to.be.ok;
 
-      result = await contract
+      result = await permit2Contract
         .connect(account1)
         .approve(token2.address, mockContract.address, bn1e18, MaxAllowanceExpiration);
       expect(result).to.be.ok;
@@ -459,12 +507,12 @@ describe('AllowanceTransfer', () => {
     });
 
     it('Should not deposit. InsufficientAllowance', async () => {
-      let result = await contract
+      let result = await permit2Contract
         .connect(account1)
         .approve(token1.address, mockContract.address, bn1e17, MaxAllowanceExpiration);
       expect(result).to.be.ok;
 
-      result = await contract
+      result = await permit2Contract
         .connect(account1)
         .approve(token2.address, mockContract.address, bn1e17, MaxAllowanceExpiration);
       expect(result).to.be.ok;
@@ -476,7 +524,7 @@ describe('AllowanceTransfer', () => {
   });
 
   describe('depositBatch+depositAllowedBatch', function () {
-    it('Should deposit (?)', async () => {
+    it('Should deposit', async () => {
       const permit: PermitBatch = {
         details: [
           {
@@ -501,7 +549,11 @@ describe('AllowanceTransfer', () => {
       const beforeAccountToken2Balance = await token2.balanceOf(account1.address);
       const beforeContractToken2Balance = await token2.balanceOf(mockContract.address);
 
-      const { domain, types, values } = AllowanceTransfer.getPermitData(permit, contract.address, network.chainId);
+      const { domain, types, values } = AllowanceTransfer.getPermitData(
+        permit,
+        permit2Contract.address,
+        network.chainId
+      );
       let signature = await account1._signTypedData(domain, types, values);
 
       let result = await mockContract.connect(account1).depositBatch(bn1e17, permit, signature);
@@ -529,12 +581,12 @@ describe('AllowanceTransfer', () => {
 
   describe('lockdown', function () {
     it('Should lockdown permit', async () => {
-      let result = await contract
+      let result = await permit2Contract
         .connect(account1)
         .approve(token1.address, mockContract.address, bn1e18, MaxAllowanceExpiration);
       expect(result).to.be.ok;
 
-      result = await contract
+      result = await permit2Contract
         .connect(account1)
         .approve(token2.address, mockContract.address, bn1e18, MaxAllowanceExpiration);
       expect(result).to.be.ok;
@@ -550,7 +602,7 @@ describe('AllowanceTransfer', () => {
         },
       ];
 
-      result = await contract.connect(account1).lockdown(approvals);
+      result = await permit2Contract.connect(account1).lockdown(approvals);
       expect(result).to.be.ok;
 
       await expect(
