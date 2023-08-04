@@ -1,6 +1,8 @@
 # Uniswap Permit2
 
-Tests: npm run harhat-test Deploy: node scripts/index.js
+Tests: npm run harhat-test
+
+Deploy: node scripts/index.js
 
 --------- deploy Permit2 ---------
 
